@@ -17,7 +17,7 @@ disable-model-invocation: true
 查看仓库现状，不要假设：
 
 - `git remote -v`：是否有远端？指向哪里？（工控项目常无远端或在私有 Git 服务器）
-- 仓库根部的 `AGENTS.md`：是否存在？是否已有 `## Agent skills` 段落？
+- 仓库根部的 `AGENTS.md`：是否存在？内容是团队规则还是空/待建？是否已有 `## Agent skills` 段落？（团队信号：已有成文内容、`git shortlog -sn` 有多个提交者）
 - `CONTEXT.md`、`docs/adr/`、`docs/agents/`：是否已存在？
 - `.scratch/`：是否已有本地 markdown 工单惯例？
 - 解决方案结构：`.sln`、几个项目、UI 框架（WPF/WinForms/Avalonia）、通信层（Modbus/S7/OPC UA/串口）等，用于理解验证手段。
@@ -26,6 +26,18 @@ disable-model-invocation: true
 ### 2. 汇报并逐节确认
 
 汇总现状，然后按节提问。每节给出推荐答案，用户可以一句话接受；探索已定论的节直接跳过。
+
+**Section 0：仓库归属（最先问）**
+
+> 说明：这决定配置写在哪。团队仓库里 `AGENTS.md`、`.gitignore` 是团队共享规则，本工作流**一个字节都不能动**；个人仓库则可以直接写。
+
+- **个人仓库**：按现状处理（配置入 `docs/agents/`，指针写入 `AGENTS.md`）。
+- **团队仓库**（`AGENTS.md` 已有团队内容、多人协作）：启用**个人模式**——
+  - 配置仍写入 `docs/agents/*.md`，但指针块写入根部 `AGENTS.local.md`（个人规则文件），**不碰** `AGENTS.md`；
+  - 把 `AGENTS.local.md`、`docs/agents/`、以及 `.scratch/`（若 Section A 选了本地工单）追加到 **`.git/info/exclude`**——这是只存在本地克隆的忽略文件，不进提交，团队仓库的 `.gitignore` 保持原样；
+  - 发现机制：各 skill 被调用时会**直接读 `docs/agents/`，不依赖 AGENTS.md 指针**，所以团队文件零改动也能工作；`AGENTS.local.md` 只是给用户自己和新会话的备忘。若 harness 支持本地指令文件（或团队同意后在 `AGENTS.md` 加一行引用），由用户自行决定，本 skill 不代做。
+
+探索阶段的团队信号（`AGENTS.md` 已有内容、git 历史多个提交者）只是提示，归属以用户回答为准。
 
 **Section A：工单跟踪（issue tracker）**
 
@@ -66,10 +78,13 @@ disable-model-invocation: true
 
 先把以下内容草稿给用户过目，允许修改：
 
-- 要写入 `AGENTS.md` 的 `## Agent skills` 块
+- 要写入指针文件的 `## Agent skills` 块
 - `docs/agents/issue-tracker.md`、`docs/agents/verification.md`、`docs/agents/domain.md` 的内容
 
-目标文件固定为 **`AGENTS.md`**：存在则编辑；不存在则创建。不使用 `CLAUDE.md`。
+指针文件按 Section 0 的归属决定：
+
+- **个人仓库** → `AGENTS.md`：存在则编辑；不存在则创建。不使用 `CLAUDE.md`。
+- **团队仓库** → `AGENTS.local.md`：存在则编辑；不存在则创建。同时把 `AGENTS.local.md`、`docs/agents/`（以及 `.scratch/`，若选了本地工单）追加到 `.git/info/exclude`（已有条目不重复追加）。**不修改 `AGENTS.md` 和 `.gitignore`。**
 
 已有 `## Agent skills` 块时原地更新，不追加、不覆盖周围用户内容。
 
@@ -91,8 +106,10 @@ disable-model-invocation: true
 [一句话说明布局]。见 `docs/agents/domain.md`。
 ```
 
-`.gitignore` 中若无 `.scratch/`，询问用户是否忽略它（推荐：不忽略，工单随仓库提交，保留决策痕迹）。
+个人仓库：`.gitignore` 中若无 `.scratch/`，询问用户是否忽略它（推荐：不忽略，工单随仓库提交，保留决策痕迹）。
+
+团队仓库：`.gitignore` 不动；`.scratch/` 是否进 `.git/info/exclude` 已在上面随指针文件一并处理（默认排除，避免个人工单混进团队提交；用户想把工单提交给团队共享时除外）。
 
 ### 4. 完成
 
-告知用户配置完成、哪些 skill 会读取这些文件。以后可直接编辑 `docs/agents/*.md`；只有更换工单跟踪方式时才需要重跑本 skill。
+告知用户配置完成、哪些 skill 会读取这些文件。以后可直接编辑 `docs/agents/*.md`；只有更换工单跟踪方式时才需要重跑本 skill。团队仓库模式下提醒用户：个人配置（`AGENTS.local.md`、`docs/agents/`）已被 `.git/info/exclude` 排除，不会出现在 `git status` 里，也不会进团队提交。
