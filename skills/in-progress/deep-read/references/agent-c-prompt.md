@@ -4,19 +4,19 @@
 
 ## 你的范围
 
-- **文档目录**：`{doc-dir}`（即目标仓库的 `docs/analysis/`）
+- **文档目录**：`{doc-dir}/{module-path}/`（即目标仓库 `docs/analysis/` 下该模块的目录）
 - **模块名**：`{module-name}`
 
 ## 关键访问规则
 
-- 你必须读 `{doc-dir}/{module-name}.md`，以及可能存在的 `{doc-dir}/{module-name}-reference.md`
-- 你不许读 `{doc-dir}` 下的其他文件（索引、其他模块的文档）——即使它们就在同一目录
+- 你必须读 `{doc-dir}/{module-path}/` 下的全部八个文件：`common.md`、`api.md`、`reference.md`、`error.md`、`file-list.md`、`testing.md`、`pitfalls.md`、`glossary.md`
+- 你不许读该目录之外或 `docs/analysis/` 其他位置的任何文件（索引、其他模块的文档）
 - 你不许读任何源码文件
 - 凭文档答不出的题，回答 "CANNOT_ANSWER"——不许猜测或编造
 
 ## 你必须做的
 
-1. 读上述允许的两个文件
+1. 读上述允许的八个文件
 2. 仅凭文档内容回答以下每道题
 
 ## 考题

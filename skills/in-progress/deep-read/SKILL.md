@@ -54,6 +54,7 @@ description: 系统性深读一个代码库的选定模块，产出经过闭卷�
 
 - `{source-dir}`：源仓库路径
 - `{module-dir}`：模块在源仓库中的路径
+- `{module-path}`：模块目录相对仓库根的路径（解决方案模式即 `.csproj` 所在目录的相对路径，如 `Core/DigitalWorkstation.Core.Abstractions`）
 - `{output-dir}`：文档输出目录
 - `{project-name}`、`{module-name}`、`{ref}`
 
@@ -61,8 +62,15 @@ description: 系统性深读一个代码库的选定模块，产出经过闭卷�
 
 ```
 {仓库}/docs/analysis/
-├── {module}.md              # 模块认知文档（五维度）
-└── {module}-reference.md    # 可选：复杂模块的数据结构/签名/文件索引
+└── {module-path}/             # 镜像模块相对仓库根的路径
+    ├── common.md              # 模块简述：职责、核心设计逻辑、状态流转、常见修改场景
+    ├── api.md                 # 对外接口：公开 API、函数签名、调用方式
+    ├── reference.md           # 关系链：依赖/被依赖、核心数据结构
+    ├── error.md               # 异常：可能抛出的异常、错误处理路径、排查方式
+    ├── file-list.md           # 文件结构：目录树与每个文件的基本功能
+    ├── testing.md             # 验证方式：测试位置、运行命令、最小验证集（C# 桌面端跳过 UI 单测，聚焦数据检测）
+    ├── pitfalls.md            # 不变量与陷阱：隐含约束、易错改法、历史踩坑
+    └── glossary.md            # 术语表：模块特有术语、缩写、与同名通用概念的区别
 ```
 
 子 agent 返回后确认文件已写入，再更新该模块任务状态。
@@ -72,7 +80,7 @@ description: 系统性深读一个代码库的选定模块，产出经过闭卷�
 对每个已生成文档的模块执行：
 
 1. **子 agent B（出题）**：用 `references/agent-b-prompt.md`（填入 `{module-dir}`、`{module-name}`、`{previous_questions}`，首轮为空），派**只读**子 agent。它只读源码、不看文档，产出验证考题（带答案要点和 `required_facts`）+ 推荐给用户的思考题。
-2. **子 agent C（闭卷）**：用 `references/agent-c-prompt.md`（填入 `{doc-dir}`、`{module-name}`、`{questions}`——只给题目，不给答案要点），只读该模块的生成文档答题。
+2. **子 agent C（闭卷）**：用 `references/agent-c-prompt.md`（填入 `{doc-dir}`、`{module-path}`、`{module-name}`、`{questions}`——只给题目，不给答案要点），只读该模块目录下的八个生成文档答题。
 3. **评分**：逐题对照 `required_facts`——答案覆盖全部必要事实为通过，缺任何一条为失败。这是客观核对，不是主观判断。
 4. **循环规则（硬性）**：100% 通过或满 3 轮才停，无提前退出。
    - 有题失败 → 收集失败题（题目、B 的答案要点、C 的失败答案），反馈给 agent A 补写文档；重跑 B/C，并把历轮所有题目作为 `{previous_questions}` 传入，逼 B 出新题覆盖未测领域。
@@ -83,9 +91,11 @@ description: 系统性深读一个代码库的选定模块，产出经过闭卷�
 ### 5. 全局索引与指针注册
 
 所有模块验证通过后：
-
 1. 生成 `{仓库}/docs/analysis/README.md`：仓库来源、版本（tag 或 commit hash）、跟踪分支、生成时间、每个模块一句话职责、模块间依赖关系（解决方案模式直接采用 `<ProjectReference>` 图，是权威来源，不靠推断）、跨模块场景指南（常见跨模块操作涉及哪些模块、什么顺序——通读全部模块文档后综合得出）。
-2. 在 `AGENTS.md`（团队仓库个人模式：`AGENTS.local.md`）为每个模块文档注册一行上下文指针，措辞遵循 `writing-for-agents`：前载引导词、列明触发分支（"修改 X 模块时读 docs/analysis/X.md"）。
+2. 在 `AGENTS.md`（团队仓库个人模式：`AGENTS.local.md`）写入一个 `## 模块认知文档` 小节，包含三块内容（已存在该小节则就地更新，不重复追加）：
+   - **先读规则**：一条硬性规则——"修改某模块的任何代码前，必须先读 `docs/analysis/{module-path}/` 下的文档，`common.md` 是入口，按任务性质再读 `api.md`/`error.md`/`pitfalls.md`/`testing.md`"。
+   - **同步规则**：一条硬性规则——"开发新功能或修复 bug 时，提交前必须同步更新受影响模块的 `docs/analysis/` 文档：接口变了改 `api.md`，行为/流转变了改 `common.md`，异常变了改 `error.md`，文件增删改 `file-list.md`，测试变了改 `testing.md`，发现新坑补 `pitfalls.md`，引入新术语补 `glossary.md`。文档与代码不一致视为任务未完成"。
+   - **模块指针表**：每个模块一行，措辞遵循 `writing-for-agents`——前载引导词、列明触发分支，如"修改 Abstractions 项目时读 `docs/analysis/Core/DigitalWorkstation.Core.Abstractions/`"。
 
 ### 6. 用户验收
 
@@ -100,7 +110,7 @@ description: 系统性深读一个代码库的选定模块，产出经过闭卷�
 
 ## 关键规则
 
-- **源仓库只读**——全程不修改其中任何文件
+- **源仓库只读**——全程不修改任何源码文件；`docs/analysis/` 与 `AGENTS.md` 中的 `## 模块认知文档` 小节是本技能的产出物，不受此限
 - **agent 隔离是核心**——A 只见模块源码，B 只见源码不见文档，C 只见文档不见源码；提示词中的访问规则原样保留
 - **无需切换模型**——三个子 agent 都用平台默认模型；验证的有效性来自访问隔离，不来自模型强弱差异（原版让 B 用弱模型的理由是"弱模型都能发现的缺口才是真缺口"，属于成本优化，不是机制必需）
 - **文档必须自足**——闭卷循环就是为了验证这一点；每条论断必须引用具体函数名、类型名或文件路径
