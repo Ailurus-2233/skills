@@ -56,6 +56,7 @@
 | `wizard`           | 只有人能走的步骤（厂商软件/授权/驱动/下载程序）生成 PowerShell 向导 |
 | `handoff`          | 把当前会话压缩成交接文档供新会话继续                                |
 | `wait-what`        | 没听懂时的重讲纠正器                                                |
+| `commit-message`   | 生成中文 Conventional Commits 提交信息；直接调用只输出信息，流程收尾时用于提交 |
 
 ### 工程化技能（`skills/engineering/`）
 

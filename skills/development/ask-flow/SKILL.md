@@ -71,6 +71,7 @@ disable-model-invocation: true
 - **`/wizard`**：只有**人**能走的步骤：安装厂商软件/授权、配置串口驱动、在 PLC 编程软件里下载程序、一次性迁移。生成 PowerShell 向导脚本，逐阶段引导。agent 自己能做的不要用它。
 - **`/wait-what`**：上一条消息没听懂时的纠正器。在任何其他 skill 中途使用，agent 用平实语言和 `CONTEXT.md` 词汇重讲一遍。
 - **`/handoff`**：把当前会话压缩成交接文档，供新会话继续。
+- **`/commit-message`**：生成中文 Conventional Commits 提交信息。单独提交一批改动时直接调；`/implement` 和 `/diagnosing-bugs` 收尾时会自行调用它。
 - **`/teach`** 未移植：多会话学习工作区，非开发流程。需要时参考 matt 原版。
 - **`/writing-for-agents`**：写 agent 消费的文档（skill、AGENTS.md、被指针对象）的参考。维护本仓库时使用。
 
