@@ -6,7 +6,7 @@
 
 - **源仓库**：`{source-dir}`
 - **要读的模块**：`{module-dir}`
-- **输出位置**：`{output-dir}/docs/analysis/{module-path}/`（八个文件，见下）
+- **输出位置**：`{output-dir}/.adev/analysis/{module-path}/`（八个文件，见下）
 - **项目**：`{project-name}`（跟踪 `{ref}`）
 
 ## 你必须做的

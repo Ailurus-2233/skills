@@ -4,12 +4,16 @@
 
 ### 工单跟踪
 
-工单为本地 markdown 文件，存于 `.scratch/<feature>/issues/`。见 `docs/agents/issue-tracker.md`。
+本地 Markdown 工单位于 `.adev/<feature>/issues/`；读写前见 `.adev/agents/issue-tracker.md`。
 
 ### 验证约定
 
-本仓库为 skill 集合（纯 markdown），无自动化验收；修改 skill 后 agent 走读 SKILL.md 并实际调用演练，向用户汇报逐步产出。见 `docs/agents/verification.md`。
+修改 skill 或 PowerShell 模板时，读取 `.adev/agents/verification.md`，走读并演练，报告证据和验证边界。
 
 ### 领域文档
 
-single-context 布局：根部一个 `CONTEXT.md` + `docs/adr/`。见 `docs/agents/domain.md`。
+single-context：`.adev/GLOSSARY.md` + `.adev/adr/`；探索前读取 `.adev/agents/domain.md`。
+
+### 分诊标签
+
+分诊和发布工单时读取 `.adev/agents/triage-labels.md`。

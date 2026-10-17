@@ -8,17 +8,21 @@ disable-model-invocation: true
 
 记不清流程时，问。
 
+推荐某个 skill、描述其行为或建议跳过步骤前，先读该 skill 的 `SKILL.md`；这里的摘要只负责导航。
+
 **flow** 是穿过各 skill 的一条路径。大多数路径沿一条**主流程**走，两条**入口坡道**汇入主流程，其余是独立工具或运行在底层的词汇层。
 
 ## 主流程：想法 → 交付
 
-1. **`/grill-with-docs`** 用面试把想法问透。在仓库中工作时从这里开始：它有状态，把学到的沉淀进 `CONTEXT.md` 和 ADR。（不在仓库中？用 `/grill-me`，见独立工具。两者跑同一个 `/grilling` 原语，`grill-with-docs` 会留下纸面记录。）
-2. **分支：所有问题都能在对话中敲定吗？** 如果某个问题需要可运行的答案（状态模型、业务逻辑、必须亲眼看到的 UI），绕道原型：`/prototype` 用一次性的代码回答问题，答案带回原思路，决策写进 ADR。
+1. **`/grill-with-docs`** 用面试把想法问透。在仓库中工作时从这里开始：它有状态，把学到的沉淀进 `.adev/GLOSSARY.md` 和 ADR。（不在仓库中？用 `/grill-me`，见独立工具。两者跑同一个 `/grilling` 原语，`grill-with-docs` 会留下纸面记录。）
+2. **分支：所有问题都能在对话中敲定吗？** 如果某个问题需要可运行的答案（状态模型、业务逻辑、必须亲眼看到的 UI），绕道原型：`/prototype` 用一次性的代码回答问题，答案带回原思路，决策写进 ADR。需要换目录或会话时，用 `/handoff` 带出问题，再把原型结论交接回来。
 3. **分支：这是多会话的构建吗？**
-   - **是** → **`/to-spec`**（把讨论沉淀为 spec），再 **`/to-tickets`** 拆成 tracer-bullet 工单，每个声明**阻塞边**。按 frontier 逐个工单 **`/implement`**，每个工单开新会话。
+   - **是** → **`/to-spec`**（把讨论沉淀为 spec），再 **`/to-tickets`** 拆成 tracer-bullet 工单，每个声明**阻塞边**。默认按 frontier 逐个工单 **`/implement`**，每个工单开新会话。用户显式调用 **`/implement-spec`** 时，可用独立 worktree 并行实现同一批就绪片段，由主 agent 集成、编译并集中请求手动验收；通过后才推进依赖工单。
    - **否** → 直接 **`/implement`**，就在当前上下文里做。
 
-   **`/implement`** 的纪律：**不写单元测试和自动化验收脚本**。每完成一个实现片段就停下，按 `docs/agents/verification.md` 给出**手动验证步骤**，等用户运行程序确认通过后再继续。
+   **`/implement`** 的纪律：**默认不新增自动化测试，用户明确要求时除外**。每完成一个实现片段就停下，按 `.adev/agents/verification.md` 给出**手动验证步骤**，等用户运行程序确认通过后再继续。工单全部验收通过后自动 `/code-review`，修复引起行为变化则重新验收，审查处理完再提交。
+
+需要写 PR 时调用 `/pr` 组织变更说明与实际证据。用户显式调用 `/retro` 时复盘环境改进；它提出建议，不自动加测试、CI 或改写规则。
 
 ### 上下文卫生
 
@@ -44,7 +48,7 @@ disable-model-invocation: true
 
 两个模型可自动调用的参考，运行在其他 skill **之下**，各自是其词汇的单一事实来源。当问题是**词**而不是流程时直接用；否则让上面的 skill 自行拉取。
 
-- **`/domain-modeling`**：磨尖项目的*领域*语言——挑战含混术语、解决一词多义、把难反转的决策记成 ADR。`/grill-with-docs` 靠它保持 `CONTEXT.md` 是一份干净的词汇表。
+- **`/domain-modeling`**：磨尖项目的*领域*语言——挑战含混术语、解决一词多义、把难反转的决策记成 ADR。`/grill-with-docs` 靠它保持 `.adev/GLOSSARY.md` 是一份干净的词汇表。
 - **`/codebase-design`**：深模块词汇（module、interface、depth、seam、adapter、leverage、locality），用于设计模块的*形状*：小接口、大行为、干净的 seam。
 
 ## 阶段边界
@@ -57,7 +61,7 @@ disable-model-invocation: true
 - **子 agent**：把范围紧凑的任务发到独立窗口，拿报告回来。
 - **压缩**：压缩当前上下文并以此开启新会话。**默认项**。
 
-在边界处做决定；阶段中途只有继续或把剩余拆给子 agent。
+在边界处做决定；阶段中途只有继续或把剩余拆给子 agent。先判断当前上下文能否继续，再判断是否需要跨工具/目录交接、是否有独立子任务；只有下一步不需要任何已有信息时才清空，剩余情况压缩。
 
 ## 独立工具
 
@@ -66,10 +70,10 @@ disable-model-invocation: true
 - **`/prototype`**：一次性程序回答一个设计问题：状态模型对不对、UI 该长什么样。答案折叠回真实代码，原型作为 primary source 提交到 `prototype/<name>` 分支并在实现工单留指针。
 - **`/research`**：把阅读跑腿委托给**后台 agent**：对照**primary sources** 调查问题，在仓库留下带引用的 markdown 文件。它产出的文件是带进 `/grill-with-docs` 的素材。
 - **`/to-questionnaire`**：阻塞你的知识不在你脑子里、也不在代码库里，而在**别人脑子里**时，写一份问卷给对方填。它是 `/grill-me` 的反面：面试你关于**寄送**的事，问题瞄准认知差。收回的答案是 `/grill-with-docs` 或 `/to-spec` 的素材。
-- **`/code-review`**：独立的变更审查（实现质量 + Spec 两轴，并行子 agent）。找到工单则报告追加进工单文档，否则直接输出到会话供继续修改。随时可用，不属于 implement 流程。
+- **`/code-review`**：独立的变更审查（实现质量 + Spec 两轴，并行子 agent）。找到工单则报告追加进工单文档，否则直接输出到会话供继续修改。可独立调用，也在 `/implement` 收尾与 `/implement-spec` 集成收尾时自动调用。找不到真实 spec 时询问用户，不以会话需求替代。
 - **`/resolving-merge-conflicts`**：已在合并/rebase 冲突中时，按**意图**（追到每一侧的 primary source）逐 hunk 解决，然后完成操作。永不 `--abort`。
 - **`/wizard`**：只有**人**能走的步骤：安装厂商软件/授权、配置串口驱动、在 PLC 编程软件里下载程序、一次性迁移。生成 PowerShell 向导脚本，逐阶段引导。agent 自己能做的不要用它。
-- **`/wait-what`**：上一条消息没听懂时的纠正器。在任何其他 skill 中途使用，agent 用平实语言和 `CONTEXT.md` 词汇重讲一遍。
+- **`/wait-what`**：上一条消息没听懂时的纠正器。在任何其他 skill 中途使用，agent 用平实语言和 `.adev/GLOSSARY.md` 词汇重讲一遍。
 - **`/handoff`**：把当前会话压缩成交接文档，供新会话继续。
 - **`/commit-message`**：生成中文 Conventional Commits 提交信息。单独提交一批改动时直接调；`/implement` 和 `/diagnosing-bugs` 收尾时会自行调用它。
 - **`/teach`** 未移植：多会话学习工作区，非开发流程。需要时参考 matt 原版。

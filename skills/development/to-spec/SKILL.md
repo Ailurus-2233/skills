@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 本 skill 把当前对话上下文和对代码库的理解产出为一份 spec。**不要面试用户**，只综合已知信息。
 
-工单跟踪方式和验证约定应当已由 `/setup-dev-workflow` 配置好（`docs/agents/issue-tracker.md`、`docs/agents/verification.md`）。如果没有，提示用户先运行 `/setup-dev-workflow`。
+工单跟踪方式和验证约定应当已由 `/setup-dev-workflow` 配置好（`.adev/agents/issue-tracker.md`、`.adev/agents/verification.md`、`.adev/agents/triage-labels.md`）。缺少工单或验证配置时提示用户先运行 `/setup-dev-workflow`。若未安装 triage、初始化因此未生成标签映射，则沿用规范角色名，不为缺少这份可选文件阻塞。
 
 ## 流程
 
@@ -14,7 +14,7 @@ disable-model-invocation: true
 
 2. 草拟**验证点**：这个功能完成后，用户在界面上/设备上能观察到哪些行为变化。优先利用现有界面与日志，不为此专门加测试代码。与用户确认这些验证点符合预期。
 
-3. 按下面模板写 spec，发布到配置好的工单跟踪处。
+3. 按下面模板写 spec，发布到配置好的工单跟踪处。按 triage 映射标记 `ready-for-agent`，表示规格已就绪，无需再分诊；不是实现完成，不关闭 spec。后续实现与审查必须能通过路径或 tracker 引用读取这份真实 spec。
 
 <spec-template>
 
