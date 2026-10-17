@@ -7,9 +7,9 @@
 ```
 .
 ├── skills/                  # 正式可用的 Skill
-│   ├── engineering/         # 工程规范类：代码审查、重构、测试等
-│   ├── development/         # 开发流程类：需求分析、调试、发布等
-│   ├── misc/                # 其他暂不归类
+│   ├── workflow/            # 定义一般工作流的常用技能
+│   ├── development/         # 开发常用技能
+│   ├── agent/               # 服务于 agent、技能与 agent 配置的技能
 │   ├── in-progress/         # 编写中，尚未定稿
 │   └── archive/             # 已废弃，仅保留存档
 ├── .adev/                   # 本地工作流配置、词汇、ADR、工单（Git 忽略）
@@ -20,77 +20,67 @@
 
 ## 当前 Skill
 
-一套原子化的开发 skill（参考 matt-pocock 的 skills 改造，面向 C# 工控/桌面端），按功能分两类：**开发时技能**（`skills/development/`，需求分析、规划、实现、调试等流程）与**工程化技能**（`skills/engineering/`，代码审查、架构健康、词汇规范等作用于代码库质量的纪律）。全套流程的路由见 `ask-flow`。
+技能分为三类：`workflow` 共同定义一般工作流，`development` 提供开发常用能力，`agent` 服务于 agent 及技能、配置的维护。全套流程的路由见 `ask-flow`。
 
-### 开发时技能（`skills/development/`）
+### 工作流技能（`skills/workflow/`）
 
-需求分析、规划、实现、调试等开发流程中使用的技能。
+| Skill | 用途 |
+| --- | --- |
+| [setup-dev-workflow](skills/workflow/setup-dev-workflow/SKILL.md) | 为目标仓库配置工单跟踪、手动验证约定（工控/纯桌面端）、文档布局；首次使用前运行一次。统一存入 `.adev/`，并在 `.gitignore` 中忽略 |
+| [ask-flow](skills/workflow/ask-flow/SKILL.md) | 不确定该用哪个 skill / 流程时的路由器 |
+| [grill-me](skills/workflow/grill-me/SKILL.md) | 同一面试的无状态入口（不在仓库中时使用） |
+| [grill-with-docs](skills/workflow/grill-with-docs/SKILL.md) | 面试打磨想法，沿途沉淀 `.adev/GLOSSARY.md` 词汇表与 ADR |
+| [wayfinder](skills/workflow/wayfinder/SKILL.md) | 超大多会话工作的决策地图：decision tickets + fog of war |
+| [to-spec](skills/workflow/to-spec/SKILL.md) | 把对话综合成 spec，保存为本地 Markdown 文件 |
+| [to-tickets](skills/workflow/to-tickets/SKILL.md) | 把 spec/计划拆成 tracer-bullet 工单，验收标准为手动验证步骤 |
+| [triage](skills/workflow/triage/SKILL.md) | 把外来 bug/请求在分诊角色状态机里移动，产出 agent-ready 工单 |
+| [implement](skills/workflow/implement/SKILL.md) | 完成整张 ticket，构建通过后一次性交付 Markdown 验收清单 |
+| [implement-spec](skills/workflow/implement-spec/SKILL.md) | 仅显式调用：按工单依赖并行实现，逐批集成编译，按 ticket 交付验收清单 |
+| [check-result](skills/workflow/check-result/SKILL.md) | 读取用户填写的验收清单，推进修复或确认验收通过，再调用 code-review 完成审查 |
+| [code-review](skills/workflow/code-review/SKILL.md) | 变更审查：实现质量（合理性/SOLID/风险/注释）+ Spec 两轴并行子 agent |
 
-#### 流程骨架
+### 开发常用技能（`skills/development/`）
 
-| Skill                | 用途                                                                                                                                                               |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `setup-dev-workflow` | 为目标仓库配置工单跟踪、手动验证约定（工控/纯桌面端）、文档布局；首次使用前运行一次。统一存入 `.adev/`，并在 `.gitignore` 中忽略 |
-| `ask-flow`           | 不确定该用哪个 skill / 流程时的路由器                                                                                                                              |
-| `grill-with-docs`    | 面试打磨想法，沿途沉淀 `.adev/GLOSSARY.md` 词汇表与 ADR                                                                                                                   |
-| `grill-me`           | 同一面试的无状态入口（不在仓库中时使用）                                                                                                                           |
-| `grilling`           | 面试原语：分轮、frontier、推荐答案                                                                                                                                 |
-| `to-spec`            | 把对话综合成 spec，发布到工单跟踪处                                                                                                                                |
-| `to-tickets`         | 把 spec/计划拆成 tracer-bullet 工单，验收标准为手动验证步骤                                                                                                        |
-| `implement` | 逐片段编译与手动验收；工单验收后自动审查，行为修复重新验收 |
-| `implement-spec` | 仅显式调用：按工单依赖并行实现，逐批集成编译与手动验收 |
+| Skill | 用途 |
+| --- | --- |
+| [commit-message](skills/development/commit-message/SKILL.md) | 生成中文 Conventional Commits 提交信息；直接调用只输出信息，流程收尾时用于提交 |
+| [diagnosing-bugs](skills/development/diagnosing-bugs/SKILL.md) | 疑难 bug 诊断闭环：先建紧致反馈闭环再假设，修复后手动回归验证 |
+| [grilling](skills/development/grilling/SKILL.md) | 面试原语：分轮、frontier、推荐答案 |
+| [handoff](skills/development/handoff/SKILL.md) | 把当前会话压缩成交接文档供新会话继续 |
+| [pr](skills/development/pr/SKILL.md) | 写 PR 描述：行为变化、实际验证证据与合并影响 |
+| [prototype](skills/development/prototype/SKILL.md) | 一次性代码回答设计问题（逻辑/状态模型或 UI） |
+| [research](skills/development/research/SKILL.md) | 后台 agent 对照一手资料调研，产出带引用的 markdown |
+| [wait-what](skills/development/wait-what/SKILL.md) | 没听懂时的重讲纠正器 |
+| [codebase-design](skills/development/codebase-design/SKILL.md) | 深模块词汇（module/interface/depth/seam/adapter/leverage/locality） |
+| [improve-codebase-architecture](skills/development/improve-codebase-architecture/SKILL.md) | 扫描深化机会，HTML 报告呈现，挑中后进入 grilling loop |
+| [resolving-merge-conflicts](skills/development/resolving-merge-conflicts/SKILL.md) | 按意图逐 hunk 解决合并/rebase 冲突，永不 `--abort` |
 
-#### 入口坡道（分析类）
+### Agent 支持技能（`skills/agent/`）
 
-| Skill             | 用途                                                          |
-| ----------------- | ------------------------------------------------------------- |
-| `triage`          | 把外来 bug/请求在分诊角色状态机里移动，产出 agent-ready 工单  |
-| `diagnosing-bugs` | 疑难 bug 诊断闭环：先建紧致反馈闭环再假设，修复后手动回归验证 |
-| `wayfinder`       | 超大多会话工作的决策地图：decision tickets + fog of war       |
+| Skill | 用途 |
+| --- | --- |
+| [retro](skills/agent/retro/SKILL.md) | 显式复盘会话，提出环境改进建议；不自动新增测试、CI 或规则 |
+| [wizard](skills/agent/wizard/SKILL.md) | 只有人能走的步骤（厂商软件/授权/驱动/下载程序）生成 PowerShell 向导 |
+| [domain-modeling](skills/agent/domain-modeling/SKILL.md) | 领域词汇纪律：`.adev/GLOSSARY.md` 词汇表与 ADR |
+| [writing-for-agents](skills/agent/writing-for-agents/SKILL.md) | 写 skill / AGENTS.md 等 agent 文档的参考（维护本仓库时用） |
 
-#### 独立工具
+主流程：`grill-with-docs` →（单会话直接 `implement`；多会话则 `to-spec` → `to-tickets` → 逐工单 `implement` → 用户填写清单 → `check-result`）。
 
-| Skill              | 用途                                                                |
-| ------------------ | ------------------------------------------------------------------- |
-| `prototype`        | 一次性代码回答设计问题（逻辑/状态模型或 UI）                        |
-| `research`         | 后台 agent 对照一手资料调研，产出带引用的 markdown                  |
-| `to-questionnaire` | 把认知差写成问卷，向持有知识的人索取答案                            |
-| `wizard`           | 只有人能走的步骤（厂商软件/授权/驱动/下载程序）生成 PowerShell 向导 |
-| `retro` | 显式复盘会话，提出环境改进建议；不自动新增测试、CI 或规则 |
-| `pr` | 写 PR 描述：行为变化、实际验证证据与合并影响 |
-| `handoff`          | 把当前会话压缩成交接文档供新会话继续                                |
-| `wait-what`        | 没听懂时的重讲纠正器                                                |
-| `commit-message`   | 生成中文 Conventional Commits 提交信息；直接调用只输出信息，流程收尾时用于提交 |
-
-### 工程化技能（`skills/engineering/`）
-
-作用于代码库质量与规范的纪律，不属于具体开发流程：
-
-| Skill                           | 用途                                                                |
-| ------------------------------- | ------------------------------------------------------------------- |
-| `code-review`                   | 变更审查：实现质量（合理性/SOLID/风险/注释）+ Spec 两轴并行子 agent |
-| `improve-codebase-architecture` | 扫描深化机会，HTML 报告呈现，挑中后进入 grilling loop               |
-| `codebase-design`               | 深模块词汇（module/interface/depth/seam/adapter/leverage/locality） |
-| `domain-modeling`               | 领域词汇纪律：`.adev/GLOSSARY.md` 词汇表与 ADR                             |
-| `resolving-merge-conflicts`     | 按意图逐 hunk 解决合并/rebase 冲突，永不 `--abort`                  |
-| `writing-for-agents`            | 写 skill / AGENTS.md 等 agent 文档的参考（维护本仓库时用）          |
-
-主流程：`grill-with-docs` →（单会话直接 `implement`；多会话则 `to-spec` → `to-tickets` → 逐工单 `implement`）。
-
-与常见流程的关键差异：**默认不新增自动化测试，用户明确要求时除外**，验收由用户按验证步骤手动运行程序确认；每个验收片段先编译检查（`dotnet build` 或项目实际构建入口）。工单验收后自动代码审查；找不到真实 spec 时询问用户，不以会话需求兜底。`tdd` 与 `teach` 未移植（前者由本地验证约定适配，后者非开发流程）。词汇表与 ADR 统一放在 `.adev/`；多上下文使用 `.adev/GLOSSARY-MAP.md`。
+与常见流程的关键差异：**默认不新增自动化测试，用户明确要求时除外**，验收由用户按验证步骤手动运行程序确认；每张 ticket 完整实现并编译检查（`dotnet build` 或项目实际构建入口）后一次交付验收清单。用户在清单勾选通过项并记录问题，`check-result` 读取结果并在验收通过后调用代码审查；找不到真实 spec 时询问用户，不以会话需求兜底。`tdd` 与 `teach` 未移植（前者由本地验证约定适配，后者非开发流程）。词汇表与 ADR 统一放在 `.adev/`；多上下文使用 `.adev/GLOSSARY-MAP.md`。
 
 ### 已归档（`skills/archive/`）
 
 | Skill | 状态 |
 | ----- | ---- |
 | `deep-read` | 已停用，保留技能正文及配套参考文件，仅供历史查阅。 |
+| `to-questionnaire` | 已停用，移入归档，不再参与工作流。 |
 
 ## Skill 规范
 
 每个 Skill 为一个独立目录，至少包含一个 `SKILL.md`。需要可复用执行资源时可以包含脚本模板；当前 `wizard` 提供 PowerShell 模板：
 
 ```
-skills/engineering/my-skill/
+skills/agent/my-skill/
 ├── SKILL.md                 # 入口：名称、描述、触发条件、执行步骤
 └── references/              # 可选：引用文档、模板、示例
 ```
