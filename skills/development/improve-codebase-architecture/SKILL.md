@@ -36,7 +36,7 @@ disable-model-invocation: true
 
 ### 2. 以 HTML 报告呈现候选项
 
-写一个自包含的 HTML 文件到系统临时目录，不往仓库里落任何东西。写到 `%TEMP%\architecture-review-<时间戳>.html`，每次运行一个新文件。用 `start <路径>` 为用户打开，并告知绝对路径。
+写一个自包含的 HTML 文件到主工作区 `.adev/architecture-reviews/<时间戳>.html`，每次运行一个新文件。打开文件供用户查看，并告知绝对路径。
 
 报告用 **Tailwind CDN** 做布局样式，**Mermaid CDN** 画图；Mermaid 画关系成图的东西（调用图、依赖、时序），手工 div/内联 SVG 画更编辑化的东西（体量图、剖面图、调用树坍缩）。两者混用，别全靠 Mermaid，否则看起来千篇一律。每个候选项配一张**前后对比图**。要视觉化。
 

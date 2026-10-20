@@ -28,7 +28,7 @@ description: "审查某个固定点（commit、分支、tag、merge-base）以�
 
 ### 2. 定位 spec 来源
 
-先使用用户明确指定的 spec / 工单；否则依次检查提交消息中的引用（按 `.adev/agents/issue-tracker.md` 取回）、用户参数中的路径、与分支或功能对应的 `.adev/` / `specs/` / 项目文档中的 spec。已有会话中的文件引用可以帮助定位，但会话需求本身不是 spec。
+先使用用户明确指定的 spec / 工单；否则依次检查提交消息中的引用（按 `.adev/agents/issue-tracker.md` 取回）、用户参数中的路径、与分支或功能对应的 `.adev/<feature>/spec.md` 和 `.adev/<feature>/issues/`。已有会话中的文件引用可以帮助定位，但会话需求本身不是 spec。
 
 取回正文和相关评论，把本地文件路径及完整内容提供给 Spec 子 agent，并记录报告落点。找不到时询问用户 spec 在哪里；只有用户明确表示不存在，才跳过 Spec 轴并报告“无 spec 可对照”。等待回答期间可独立完成实现质量轴，不把缺少 spec 当作审查通过。
 
