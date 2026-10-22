@@ -1,6 +1,6 @@
 ---
-name: setup-dev-workflow
-description: "为仓库配置 C# 开发工作流：工单、分诊标签、手动验证与领域文档；统一写入 .adev 并忽略该目录。首次使用其他流程类 skill 前运行。"
+name: setup-devenv
+description: "为需要本地工单流程的仓库配置工单、分诊标签、手动验证与领域文档；统一写入 .adev 并忽略该目录。首次使用依赖这些配置的技能前运行。"
 disable-model-invocation: true
 ---
 

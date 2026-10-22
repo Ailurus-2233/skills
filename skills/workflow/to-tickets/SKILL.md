@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 把计划、spec 或对话拆成一组**工单**：tracer-bullet 式的纵向切片，每个声明哪些工单**阻塞**它。
 
-工单跟踪方式和 `.adev/agents/triage-labels.md` 标签映射应当已由 `/setup-dev-workflow` 配置好。缺少工单或验证配置时提示用户先运行 `/setup-dev-workflow`。若未安装 triage、初始化因此未生成标签映射，则沿用规范角色名，不为缺少这份可选文件阻塞。
+工单跟踪方式和 `.adev/agents/triage-labels.md` 标签映射应当已由 `/setup-devenv` 配置好。缺少工单或验证配置时提示用户先运行 `/setup-devenv`。若未安装 triage、初始化因此未生成标签映射，则沿用规范角色名，不为缺少这份可选文件阻塞。
 
 ## 流程
 

@@ -1,10 +1,10 @@
 ---
-name: ask-flow
+name: ask
 description: 不确定当前该用哪个 skill 或流程时使用。本仓库 skill 的路由器。
 disable-model-invocation: true
 ---
 
-# Ask Flow
+# Ask
 
 记不清流程时，问。
 
@@ -14,11 +14,11 @@ disable-model-invocation: true
 
 ## 主流程：想法 → 交付
 
-1. **`/grill-with-docs`** 用面试把想法问透。在仓库中工作时从这里开始：它有状态，把学到的沉淀进 `.adev/GLOSSARY.md` 和 ADR。（不在仓库中？用 `/grill-me`，见独立工具。两者跑同一个 `/grilling` 原语，`grill-with-docs` 会留下纸面记录。）
+1. **需求还有关键选择未定时**，用 `/grill-with-docs` 面试并按需沉淀领域词汇与 ADR；不在仓库中时用 `/grill-me`。目标、边界已明确时直接进入对应实现路径。
 2. **分支：所有问题都能在对话中敲定吗？** 如果某个问题需要可运行的答案（状态模型、业务逻辑、必须亲眼看到的 UI），绕道原型：`/prototype` 用一次性的代码回答问题，答案带回原思路，决策写进 ADR。需要换目录或会话时，用 `/handoff` 带出问题，再把原型结论交接回来。
 3. **分支：这是多会话的构建吗？**
    - **是** → **`/to-spec`**（把讨论沉淀为 spec），再 **`/to-tickets`** 拆成 tracer-bullet 工单，每个声明**阻塞边**。默认按 frontier 逐个工单 **`/implement`**，每个工单开新会话。用户显式调用 **`/implement-spec`** 时，可用独立 worktree 并行实现同一批就绪工单，由主 agent 集成、编译并逐 ticket 生成验收清单；通过后才推进依赖工单。
-   - **否** → 直接 **`/implement`**，就在当前上下文里做。
+   - **否** → 若已有 spec / 工单，直接 **`/implement`**。若只是明确的小改动，按用户当前要求直接实现并报告实际检查与未验证边界，不为它新建 spec、工单或验收清单；需要用户现场验证时给出可执行步骤。
 
    **`/implement`** 的纪律：**默认不新增自动化测试，用户明确要求时除外**。每张 ticket 全部实现并构建通过后，一次性交付 Markdown 验收清单。用户勾选通过项、记录问题后调用 **`/check-result`**：待验证则等待，有问题则修复，验收通过则调用 `/code-review`，两者通过才完成并提交。修复沿用原清单，仅复验受影响项。
 
@@ -26,7 +26,7 @@ disable-model-invocation: true
 
 ### 上下文卫生
 
-第 1–3 步保持在**同一个未压缩的上下文窗口**内（`/to-tickets` 之前不要清空），让面试、spec、工单共享同一份思考。之后每个 `/implement` 开新窗口，从工单自包含地开始。接近模型的 smart zone（约 150k token）时，在最近的阶段边界压缩上下文再继续，不要在退化的状态下硬撑。
+面试、spec、工单阶段沿用已有上下文；跨会话时让工单自包含。上下文将满时在阶段边界压缩并保留权威文件路径。
 
 ## 入口坡道
 
@@ -34,7 +34,7 @@ disable-model-invocation: true
 
 - **bug 和请求堆积** → **`/triage`**。把工单在分诊角色状态机里移动，产出 agent 可直接开工的工单，之后由 `/implement` 认领。分诊只用于**不是你创建的**工单；`/to-tickets` 产出的工单已是 agent-ready，不要再分诊。
 
-- **有东西坏了** → **`/diagnosing-bugs`**。对付硬的：一眼看不穿的 bug、间歇性 flake、两个已知良好状态之间溜进来的回归。它拒绝在拥有**紧致反馈闭环**（一个能在此 bug 上变红的操作）之前构建理论，修复后用手动回归验证步骤锁定，由用户确认。
+- **原因不明、间歇性或反复修复无效的 bug** → **`/diagnosing-bugs`**。先建立能捕获具体症状的反馈闭环，再排查与修复；普通且原因明确的缺陷直接修复并验证。
 
 - **巨大而模糊的努力：全新项目或超大功能，一个会话装不下** → **`/wayfinder`**。从这里到目的地的路还看不见时，它在工单跟踪处画一张**共享地图**（decision tickets），一次解一个，产出**决策而非交付物**，直到雾散开。它只交接不构建：地图清晰后汇入 `/to-spec`，把链好的决策折叠成可构建的计划，再照常 `/to-tickets`、`/implement`。
 
@@ -67,10 +67,10 @@ disable-model-invocation: true
 
 - **`/grill-me`**：与 `/grill-with-docs` 相同的面试，但**无状态**。不在仓库中时使用；在仓库中一律用 `grill-with-docs`。
 - **`/grilling`**：面试原语本身：轮次、frontier、查事实是 agent 的事、决策是用户的事。只想裸用面试机制时直接调。
-- **`/prototype`**：一次性程序回答一个设计问题：状态模型对不对、UI 该长什么样。答案折叠回真实代码，原型作为 primary source 提交到 `prototype/<name>` 分支并在实现工单留指针。
-- **`/research`**：把阅读跑腿委托给**后台 agent**：对照**primary sources** 调查问题，在仓库留下带引用的 markdown 文件。它产出的文件是带进 `/grill-with-docs` 的素材。
-- **`/code-review`**：独立的变更审查（实现质量 + Spec 两轴，并行子 agent）。找到工单则报告追加进工单文档，否则直接输出到会话供继续修改。可独立调用，也由 `/check-result` 在 ticket 验收通过后及 `/implement-spec` 集成收尾时调用。找不到真实 spec 时询问用户，不以会话需求替代。
-- **`/resolving-merge-conflicts`**：已在合并/rebase 冲突中时，按**意图**（追到每一侧的 primary source）逐 hunk 解决，然后完成操作。永不 `--abort`。
+- **`/prototype`**：一次性程序回答一个设计问题：状态模型对不对、UI 该长什么样。记录答案；原型有后续价值时才保留分支。
+- **`/research`**：对照一手资料调查问题，交付带引用的结论；需要跨会话复用时留 Markdown，独立调查值得并行时再派后台 agent。
+- **`/code-review`**：独立审查实现质量；有真实 spec 时再核对需求。复杂变更用子 agent 分轴审查；找不到 spec 时明确报告该轴未覆盖。
+- **`/resolving-merge-conflicts`**：已在合并/rebase 冲突中时，按两侧意图逐 hunk 解决，用项目实际检查验证，只暂存本次冲突文件。
 - **`/wizard`**：只有**人**能走的步骤：安装厂商软件/授权、配置串口驱动、在 PLC 编程软件里下载程序、一次性迁移。生成 PowerShell 向导脚本，逐阶段引导。agent 自己能做的不要用它。
 - **`/wait-what`**：上一条消息没听懂时的纠正器。在任何其他 skill 中途使用，agent 用平实语言和 `.adev/GLOSSARY.md` 词汇重讲一遍。
 - **`/handoff`**：把当前会话压缩成交接文档，供新会话继续。
@@ -80,4 +80,4 @@ disable-model-invocation: true
 
 ## 前置条件
 
-**`/setup-dev-workflow`**：首次使用本流程前运行一次，配置工单跟踪、手动验证约定（工控/纯桌面端）和文档布局。其他 skill 假设这些文件存在；不存在时它们会提示你先运行它。
+**`/setup-devenv`**：需要本地工单、手动验收和领域文档的工作流首次使用前运行一次。独立的路由、调研、审查或小改动不以此为前置条件；依赖配置的 skill 在配置缺失时提示运行它。

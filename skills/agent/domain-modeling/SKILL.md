@@ -11,7 +11,7 @@ description: 构建并打磨项目的领域模型。讨论代码库术语、编�
 
 先读 `.adev/agents/domain.md` 确认布局。多数仓库使用 `.adev/GLOSSARY.md` 与 `.adev/adr/`。多上下文使用 `.adev/GLOSSARY-MAP.md`，指向 `.adev/contexts/<context>/GLOSSARY.md` 和 `.adev/adr/<context>/`；所有工作流文档均留在根部 `.adev/` 内。先确定当前话题所属上下文，无法判断时询问；以下“当前词汇表”指配置/索引选定的那一份文件，多上下文时不另建单上下文词汇表。
 
-按需创建：第一个术语敲定时才创建词汇表，第一份 ADR 需要落笔时才创建 ADR 目录。文件不存在就继续，不先生成空文档。旧的 `CONTEXT.md` / `CONTEXT-MAP.md` 按 `setup-dev-workflow` 的迁移流程处理，避免新旧两套词汇同时维护。
+按需创建：第一个术语敲定时才创建词汇表，第一份 ADR 需要落笔时才创建 ADR 目录。文件不存在就继续，不先生成空文档。旧的 `CONTEXT.md` / `CONTEXT-MAP.md` 按 `setup-devenv` 的迁移流程处理，避免新旧两套词汇同时维护。
 
 ## 会话进行中
 

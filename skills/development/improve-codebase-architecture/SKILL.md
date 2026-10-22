@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 本命令以项目的领域模型为*依据*，并建立在一套共享的设计词汇之上：
 
-- 调用 Skill 工具的 "codebase-design"，获取架构词汇（**模块**、**接口**、**深度**、**缝**、**适配器**、**杠杆**、**局部性**）及其原则（删除测试、"接口就是验证面"、"一个适配器 = 假想的缝，两个 = 真实的缝"）。每条建议都要严格使用这些术语，不要滑向"组件""服务""API""边界"。
+- 加载 "codebase-design"，用其中的架构词汇（**模块**、**接口**、**深度**、**缝**、**适配器**、**杠杆**、**局部性**）分析候选项；描述真实代码时沿用代码里的准确名称。
 - `.adev/GLOSSARY.md` 里的领域语言给好的缝命名；`.adev/adr/` 里的 ADR 记录着本命令不应重新翻炒的决策。
 
 ## 流程
@@ -24,7 +24,7 @@ disable-model-invocation: true
 
 先按 `.adev/agents/domain.md` 定位并读取当前上下文词汇表（单上下文 `.adev/GLOSSARY.md`，多上下文由 `.adev/GLOSSARY-MAP.md` 指向）和你所触及区域的 ADR。
 
-然后派出一个子 agent 走查代码库。不要套死板的启发式；有机地探索，记下你体验到摩擦的地方：
+然后走查代码库；范围大且可独立扫描时再派子 agent。不要套死板的启发式；记下有证据的摩擦：
 
 - 哪里要理解一个概念，得在一大堆小模块之间来回跳？
 - 哪些模块是**浅**的，接口几乎和实现一样复杂？
@@ -36,9 +36,9 @@ disable-model-invocation: true
 
 ### 2. 以 HTML 报告呈现候选项
 
-写一个自包含的 HTML 文件到主工作区 `.adev/architecture-reviews/<时间戳>.html`，每次运行一个新文件。打开文件供用户查看，并告知绝对路径。
+候选项较多、关系需要图示时，写一个离线可打开的 HTML 文件到主工作区 `.adev/architecture-reviews/<时间戳>.html`，打开供用户查看并告知绝对路径。只有少量简单候选项时，直接在会话中用 Markdown 报告即可。
 
-报告用 **Tailwind CDN** 做布局样式，**Mermaid CDN** 画图；Mermaid 画关系成图的东西（调用图、依赖、时序），手工 div/内联 SVG 画更编辑化的东西（体量图、剖面图、调用树坍缩）。两者混用，别全靠 Mermaid，否则看起来千篇一律。每个候选项配一张**前后对比图**。要视觉化。
+HTML 报告使用内联 CSS、手工 div 与内联 SVG；不依赖 CDN。每个候选项配一张能解释变化的前后对比图。
 
 骨架如下，图例与配色约定照用：
 
@@ -48,22 +48,23 @@ disable-model-invocation: true
   <head>
     <meta charset="utf-8" />
     <title>{{仓库名}} 架构评审</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script type="module">
-      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-      mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "loose" });
-    </script>
     <style>
-      /* Tailwind 覆盖不干净的小东西：虚线缝、手绘感箭头 */
+      /* 所有布局、颜色与图形样式写在本文件，保证离线可看 */
+      body { margin: 0; background: #fafaf9; color: #0f172a; font: 16px/1.5 system-ui, sans-serif; }
+      main { max-width: 1100px; margin: auto; padding: 3rem 1.5rem; }
+      article { margin: 2rem 0; padding: 1.5rem; background: white; border: 1px solid #d6d3d1; border-radius: 12px; }
+      .comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+      svg { max-width: 100%; height: auto; }
       .seam { stroke-dasharray: 4 4; }
       .leak { stroke: #dc2626; }
       .deep { background: linear-gradient(135deg, #0f172a, #1e293b); }
+      @media (max-width: 700px) { .comparison { grid-template-columns: 1fr; } }
     </style>
   </head>
-  <body class="bg-stone-50 text-slate-900 font-sans">
-    <main class="max-w-5xl mx-auto px-6 py-12 space-y-12">
+  <body>
+    <main>
       <header>...</header>
-      <section id="candidates" class="space-y-10">...</section>
+      <section id="candidates">...</section>
       <section id="top-recommendation">...</section>
     </main>
   </body>
@@ -77,21 +78,21 @@ disable-model-invocation: true
 - **标题**：短，点出这次加深（如"收拢工单接收管线"）。
 - **徽章行**：推荐力度 `Strong`（翠绿）/ `Worth exploring`（琥珀）/ `Speculative`（石灰），再加一个依赖类别标签（`进程内` / `本地可替换` / `端口与适配器` / `占位`）。
 - **文件**：等宽列表，`font-mono text-sm`。
-- **前后对比图**：卡片的主角。两列并排。按候选项挑图式并换着用：Mermaid 流程图（依赖/调用流，渗漏边染红、深模块染深色；时序图适合"前：6 次往返；后：1 次"）、手工盒子加箭头（after 想画成一个粗边框深模块、内部灰掉时）、剖面图（横向色带堆叠，前：6 条薄带各自空转，后：1 条粗带标上收拢后的职责）、体量图（每个模块两个矩形：接口面积与实现面积，前：两者几乎等高 = 浅；后：接口矮、实现高 = 深）、调用树坍缩（前：嵌套盒子的调用树；后：坍缩成一个盒子，已内部化的调用淡显其中）。图高约 320px，并排不用滚动。
+- **前后对比图**：卡片的主角。两列并排。按候选项选用内联 SVG 依赖图、手工盒子加箭头、剖面图、体量图或调用树坍缩；图形必须在无网络、无脚本时可见。
 - **问题**：一句话。痛在哪。
 - **方案**：一句话。改什么。
-- **收益**：bullet，每条 ≤6 个字，用词汇表术语命名所得："局部性：缺陷聚在一处"、"杠杆：一个接口，N 个调用点"、"接口收窄，实现吞掉转发"。不写"更易维护""代码更干净"——这些词不在词汇表里，不配出现。
+- **收益**：用具体效果说明，例如"缺陷处理集中在一处"、"一个接口服务多个调用点"。避免只有"更易维护"一类无法核实的泛称。
 - **ADR 提示**（如适用）：琥珀色底框里一行字。
 
 **领域用 `.adev/GLOSSARY.md` 的词汇，架构用 `/codebase-design` 的词汇。** 如果 `.adev/GLOSSARY.md` 定义了"工单"，就说"工单接收模块"，不说"GongDanHandler"，也不说"工单服务"。
 
 **ADR 冲突**：候选项与既有 ADR 矛盾时，只在摩擦真实到值得重开该 ADR 时才摆出来，并在卡片上标清楚（如琥珀色警示框：_"与 ADR-0007 冲突，但值得重开，因为……"_）。不要把 ADR 禁止的每一个理论上的重构都列一遍。
 
-风格：编辑感，不是企业仪表盘。留白大方；颜色克制——一个主色（翠绿或靛蓝），红色只给渗漏，琥珀只给警示；图内模块标签用 `text-xs uppercase tracking-wider`，读上去像示意图而不是 UI；除 Tailwind CDN 与 Mermaid ESM 外无脚本。
+风格：留白大方，颜色克制——一个主色，红色只给渗漏，琥珀只给警示。用内联 CSS 保证布局和图例离线可读。
 
 报告以 **Top recommendation** 一节收尾：一张更大的卡片，你会先动哪个候选项、为什么，附一个跳到该卡片的锚链接。
 
-此阶段**不要提接口设计**。文件写完后问用户："想先探索哪一个？"
+报告只提出候选方向，不提前完成接口设计。用户已指定候选项时直接进入第 3 步；否则交付报告供用户选择。
 
 ### 3. 追问（grilling）循环
 

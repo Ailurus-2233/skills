@@ -20,14 +20,14 @@
 
 ## 当前 Skill
 
-技能分为三类：`workflow` 共同定义一般工作流，`development` 提供开发常用能力，`agent` 服务于 agent 及技能、配置的维护。全套流程的路由见 `ask-flow`。
+技能分为三类：`workflow` 共同定义一般工作流，`development` 提供开发常用能力，`agent` 服务于 agent 及技能、配置的维护。全套流程的路由见 `ask`。
 
 ### 工作流技能（`skills/workflow/`）
 
 | Skill | 用途 |
 | --- | --- |
-| [setup-dev-workflow](skills/workflow/setup-dev-workflow/SKILL.md) | 为目标仓库配置工单跟踪、手动验证约定（工控/纯桌面端）、文档布局；首次使用前运行一次。统一存入 `.adev/`，并在 `.gitignore` 中忽略 |
-| [ask-flow](skills/workflow/ask-flow/SKILL.md) | 不确定该用哪个 skill / 流程时的路由器 |
+| [setup-devenv](skills/workflow/setup-devenv/SKILL.md) | 为目标仓库配置工单跟踪、手动验证约定（工控/纯桌面端）、文档布局；首次使用依赖本地工单的流程前运行。统一存入 `.adev/`，并在 `.gitignore` 中忽略 |
+| [ask](skills/workflow/ask/SKILL.md) | 不确定该用哪个 skill / 流程时的路由器 |
 | [grill-me](skills/workflow/grill-me/SKILL.md) | 同一面试的无状态入口（不在仓库中时使用） |
 | [grill-with-docs](skills/workflow/grill-with-docs/SKILL.md) | 面试打磨想法，沿途沉淀 `.adev/GLOSSARY.md` 词汇表与 ADR |
 | [wayfinder](skills/workflow/wayfinder/SKILL.md) | 超大多会话工作的决策地图：decision tickets + fog of war |
@@ -37,7 +37,7 @@
 | [implement](skills/workflow/implement/SKILL.md) | 完成整张 ticket，构建通过后一次性交付 Markdown 验收清单 |
 | [implement-spec](skills/workflow/implement-spec/SKILL.md) | 仅显式调用：按工单依赖并行实现，逐批集成编译，按 ticket 交付验收清单 |
 | [check-result](skills/workflow/check-result/SKILL.md) | 读取用户填写的验收清单，推进修复或确认验收通过，再调用 code-review 完成审查 |
-| [code-review](skills/workflow/code-review/SKILL.md) | 变更审查：实现质量（合理性/SOLID/风险/注释）+ Spec 两轴并行子 agent |
+| [code-review](skills/workflow/code-review/SKILL.md) | 变更审查：实现质量；有真实 spec 时核对需求，复杂变更按轴并行 |
 
 ### 开发常用技能（`skills/development/`）
 
@@ -49,11 +49,11 @@
 | [handoff](skills/development/handoff/SKILL.md) | 把当前会话压缩成交接文档供新会话继续 |
 | [pr](skills/development/pr/SKILL.md) | 写 PR 描述：行为变化、实际验证证据与合并影响 |
 | [prototype](skills/development/prototype/SKILL.md) | 一次性代码回答设计问题（逻辑/状态模型或 UI） |
-| [research](skills/development/research/SKILL.md) | 后台 agent 对照一手资料调研，产出带引用的 markdown |
+| [research](skills/development/research/SKILL.md) | 对照一手资料调研，按需保存带引用的 Markdown |
 | [wait-what](skills/development/wait-what/SKILL.md) | 没听懂时的重讲纠正器 |
 | [codebase-design](skills/development/codebase-design/SKILL.md) | 深模块词汇（module/interface/depth/seam/adapter/leverage/locality） |
-| [improve-codebase-architecture](skills/development/improve-codebase-architecture/SKILL.md) | 扫描深化机会，HTML 报告呈现，挑中后进入 grilling loop |
-| [resolving-merge-conflicts](skills/development/resolving-merge-conflicts/SKILL.md) | 按意图逐 hunk 解决合并/rebase 冲突，永不 `--abort` |
+| [improve-codebase-architecture](skills/development/improve-codebase-architecture/SKILL.md) | 扫描深化机会，按复杂度交付 Markdown 或离线 HTML 报告 |
+| [resolving-merge-conflicts](skills/development/resolving-merge-conflicts/SKILL.md) | 按两侧意图逐 hunk 解决合并/rebase 冲突并验证 |
 
 ### Agent 支持技能（`skills/agent/`）
 
@@ -64,9 +64,9 @@
 | [domain-modeling](skills/agent/domain-modeling/SKILL.md) | 领域词汇纪律：`.adev/GLOSSARY.md` 词汇表与 ADR |
 | [writing-for-agents](skills/agent/writing-for-agents/SKILL.md) | 写 skill / AGENTS.md 等 agent 文档的参考（维护本仓库时用） |
 
-主流程：`grill-with-docs` →（单会话直接 `implement`；多会话则 `to-spec` → `to-tickets` → 逐工单 `implement` → 用户填写清单 → `check-result`）。
+主流程：关键选择未定时先用 `grill-with-docs`；明确的小改动直接实现并报告检查结果。需要跨会话工单管理时走 `to-spec` → `to-tickets` → 逐工单 `implement` → 用户填写清单 → `check-result`。
 
-与常见流程的关键差异：**默认不新增自动化测试，用户明确要求时除外**，验收由用户按验证步骤手动运行程序确认；每张 ticket 完整实现并编译检查（`dotnet build` 或项目实际构建入口）后一次交付验收清单。用户在清单勾选通过项并记录问题，`check-result` 读取结果并在验收通过后调用代码审查；找不到真实 spec 时询问用户，不以会话需求兜底。`tdd` 与 `teach` 未移植（前者由本地验证约定适配，后者非开发流程）。词汇表与 ADR 统一放在 `.adev/`；多上下文使用 `.adev/GLOSSARY-MAP.md`。
+与常见流程的关键差异：**默认不新增自动化测试，用户明确要求时除外**。工单流程由用户按验证步骤手动运行程序确认；每张 ticket 完整实现并通过项目实际构建入口后一次交付验收清单。用户在清单勾选通过项并记录问题，`check-result` 读取结果并在验收通过后调用代码审查。独立审查找不到真实 spec 时报告需求核对边界；工单流程仍需真实 spec。`tdd` 与 `teach` 未移植（前者由本地验证约定适配，后者非开发流程）。词汇表与 ADR 统一放在 `.adev/`；多上下文使用 `.adev/GLOSSARY-MAP.md`。
 
 ### 已归档（`skills/archive/`）
 

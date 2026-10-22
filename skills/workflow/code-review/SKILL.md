@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: "审查某个固定点（commit、分支、tag、merge-base）以来的仓库变更，沿两条轴进行：实现质量（实现方式是否合理、是否符合 SOLID、有无风险、注释是否得当）和 Spec（实现是否符合工单/spec 的要求）。两轴用并行子 agent 审查后并列汇报。当用户想审查一个分支、一批未提交改动，或说 \"review 一下 X 以来的改动\" 时使用。"
+description: "审查某个固定点以来的仓库变更：检查实现质量，并在有真实 spec 或工单时核对需求。较大或复杂的变更用独立子 agent 分轴审查。"
 ---
 
 对 `HEAD` 与用户指定的固定点之间的 diff 做两轴审查：
@@ -8,9 +8,9 @@ description: "审查某个固定点（commit、分支、tag、merge-base）以�
 - **实现质量**：代码实现方式是否合理、是否遵守 SOLID、有无风险、注释是否得当
 - **Spec**：代码是否忠实实现了来源工单 / spec 的要求
 
-两轴各用一个**并行子 agent** 执行，避免互相污染上下文，最后由本 skill 汇总。
+始终分别报告实现质量与 Spec 结论。有真实 spec 且变更跨多个模块或上下文较大时，两轴各用一个并行子 agent；范围小、上下文完整时由当前 agent 完成两轴。无 spec 时只做实现质量审查，并说明 Spec 轴未覆盖。
 
-工单跟踪约定应已由 `/setup-dev-workflow` 配置（`.adev/agents/issue-tracker.md`）。缺失时提示用户先运行它。
+审查本地工单时按 `.adev/agents/issue-tracker.md` 定位记录；独立审查不要求先运行 `/setup-devenv`。
 
 ## 流程
 
@@ -30,18 +30,18 @@ description: "审查某个固定点（commit、分支、tag、merge-base）以�
 
 先使用用户明确指定的 spec / 工单；否则依次检查提交消息中的引用（按 `.adev/agents/issue-tracker.md` 取回）、用户参数中的路径、与分支或功能对应的 `.adev/<feature>/spec.md` 和 `.adev/<feature>/issues/`。已有会话中的文件引用可以帮助定位，但会话需求本身不是 spec。
 
-取回正文和相关评论，把本地文件路径及完整内容提供给 Spec 子 agent，并记录报告落点。找不到时询问用户 spec 在哪里；只有用户明确表示不存在，才跳过 Spec 轴并报告“无 spec 可对照”。等待回答期间可独立完成实现质量轴，不把缺少 spec 当作审查通过。
+找到 spec / 工单时取回正文和相关记录，用于 Spec 轴。找不到时先完成实现质量轴，并报告“无持久化 spec 可对照”；仅当用户要求核对某份特定 spec 且定位仍有歧义时询问路径。
 
 ### 3. 定位规范来源
 
 搜索仓库中所有记录代码写法的文档，列出实际找到的规范路径。`CODING_STANDARDS.md`、`CONTRIBUTING.md` 存在时必须纳入；另查 AGENTS 指向的文档和 `.adev/agents/`。`.adev/` 被忽略时需要显式读取，不能把默认搜索未返回当作不存在。
 
-在仓库文档之上，实现质量轴始终携带以下**基线**。两条约束：
+在仓库文档之上，实现质量轴按改动类型选用以下**基线**。两条约束：
 
 - **仓库约定优先。** 仓库成文的规范总是赢；它认可的做法即使触发基线也不报。
 - **基线永远是判断题。** 每项是带标签的启发式（"疑似 Feature Envy"），不是硬性违规；工具（编译器警告、Roslyn 分析器、IDE 规则）已强制的一律跳过。
 
-**坏味道（Fowler _Refactoring_ ch.3，按 diff 匹配）**：Mysterious Name、Duplicated Code、Feature Envy、Data Clumps、Primitive Obsession、Repeated Switches、Shotgun Surgery、Divergent Change、Speculative Generality、Message Chains、Middle Man、Refused Bequest。每条按"是什么 → 怎么改"对照 diff 中的 hunk。
+**坏味道（Fowler _Refactoring_ ch.3，按 diff 匹配）**：Mysterious Name、Duplicated Code、Feature Envy、Data Clumps、Primitive Obsession、Repeated Switches、Shotgun Surgery、Divergent Change、Speculative Generality、Message Chains、Middle Man、Refused Bequest。只报告本次 diff 中有具体证据的条目，按"是什么 → 怎么改"引用对应 hunk。
 
 **SOLID**（针对 C# 桌面端的具体化）：
 
@@ -63,14 +63,14 @@ description: "审查某个固定点（commit、分支、tag、merge-base）以�
 - **缺失**：非显然的逻辑（协议字节偏移、时序要求、硬件怪癖 workaround）没有注释说明**为什么**
 - **过于复杂/冗余**：注释复述代码本身（`i++ // 自增`）、大段注释掉的死代码、注释与代码已不一致、XML 文档注释只是复读成员名
 
-### 4. 并行派两个子 agent
+### 4. 执行两轴审查
 
-同轮启动两轴审查并等待全部结果后汇总，不把后台尚未返回当作无问题。
+跨多个模块、差异较大或需求复杂时，同轮启动两个子 agent 并等待全部结果；小范围改动由当前 agent 按同样的两轴问题逐项检查。C# 桌面端与工控基线仅用于相关代码，不要求非 C# 或纯文档变更套用。后台尚未返回不算通过。
 
 **实现质量子 agent** 的输入：
 
 - diff 命令、提交列表和本次新增未跟踪文件的路径清单（逐个读取完整内容）
-- 第 3 步找到的规范文件清单，**加上完整粘贴的基线内容**（子 agent 没有其他途径获得它）
+- 第 3 步找到的规范文件清单，以及与本次改动相关的基线条目
 - 任务说明："按文件/hunk 报告：(a) 违反仓库成文规范之处，引用规范（文件+规则）；(b) 发现的基线条目，命名并引用 hunk。硬性违规与判断题分开：成文规范的违反可以是硬性的，基线条目永远是判断题，仓库成文规范覆盖基线。工具已强制的跳过。400 字以内。"
 
 **Spec 子 agent** 的输入：

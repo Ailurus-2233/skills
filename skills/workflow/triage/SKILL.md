@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 把工单推过一个由 triage 角色构成的小型状态机。工单跟踪统一使用**本地 markdown**：工单文件位于 `.adev/<feature-slug>/issues/<NN>-<slug>.md`。新进来、尚未归类的报告统一放在 `.adev/inbox/issues/` 下。
 
-开始时读取 `.adev/agents/issue-tracker.md`、`.adev/agents/triage-labels.md` 与 `.adev/agents/verification.md`。缺少配置先提示用户运行 `/setup-dev-workflow`。标签文档映射下列规范角色到实际存储名称；默认使用既有角色名。
+开始时读取 `.adev/agents/issue-tracker.md`、`.adev/agents/triage-labels.md` 与 `.adev/agents/verification.md`。缺少配置先提示用户运行 `/setup-devenv`。标签文档映射下列规范角色到实际存储名称；默认使用既有角色名。
 
 分类、状态、补充问题和实现简报均写入本地工单；分诊入口只读取本地工单文件。
 
@@ -90,7 +90,7 @@ triage 期间追加到工单文件的每个章节都**必须**以这行开头：
 
 ## 快速状态覆盖
 
-维护者说"把某工单移到 ready-for-agent"时，信任他，直接写角色行。先确认你要做的动作（改角色行、追加章节、关闭），然后执行。跳过 grilling。若未经 grilling 就移到 `ready-for-agent`，问一句是否要补一份 agent 简报。
+维护者明确要求"把某工单移到 ready-for-agent"时，直接写角色行并报告变更，跳过 grilling。若缺少实现者必需的信息，在同一工单补简报；只有目标工单或目标状态不明确时才询问。
 
 ## Triage 记录模板（needs-info）
 

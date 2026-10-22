@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 仅在用户显式调用 `/implement-spec` 时执行；日常逐工单实现仍使用 `/implement`。
 
-读取真实存在的 spec、关联工单及 `.adev/agents/issue-tracker.md`、`.adev/agents/verification.md`。缺少配置先提示用户运行 `/setup-dev-workflow`；找不到 spec 时请用户指定，不以会话内容代替。目标是整份 spec 在一个集成分支上完成，工单全部经过用户验收与代码审查。
+读取真实存在的 spec、关联工单及 `.adev/agents/issue-tracker.md`、`.adev/agents/verification.md`。缺少配置先提示用户运行 `/setup-devenv`；找不到 spec 时请用户指定，不以会话内容代替。目标是整份 spec 在一个集成分支上完成，工单全部经过用户验收与代码审查。
 
 ## 权威上下文与状态
 
