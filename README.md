@@ -20,6 +20,10 @@
 
 ## 当前 Skill
 
+分类 ADR 同时提供工作索引：链接实际工作目录与依据，显示当前状态、工单进度、待办和更新时间。状态随发布、实现、验收、修复与完成从权威记录刷新；其他关联 ADR 链接此索引，不重复维护工作状态。
+
+工作资料按 `.adev/<类型>/<yyyy-mm>/<描述>/` 组织。类型由项目 ADR 定义：`feature` 为新功能、`performance` 为性能优化、`repair` 为问题修复；年月取工作首次建立的年月，跨月继续沿用原目录。目录内保存 `spec.md`、`issues/<编号-名称>.md`、`acceptance/<编号-名称>.md`，所有工单共用 `test/` 中的一个测试项目。每张工单推进时，本次用例与此前所有已验收用例必须通过累计回归；此前明确构造在单元测试项目中的测试仍沿用原项目并纳入回归。
+
 技能分为三类：`workflow` 共同定义一般工作流，`development` 提供开发常用能力，`agent` 服务于 agent 及技能、配置的维护。全套流程的路由见 `ask`。
 
 ### 工作流技能（`skills/workflow/`）
@@ -32,9 +36,9 @@
 | [grill-with-docs](skills/workflow/grill-with-docs/SKILL.md) | 面试打磨想法，沿途沉淀 `.adev/GLOSSARY.md` 词汇表与 ADR |
 | [wayfinder](skills/workflow/wayfinder/SKILL.md) | 超大多会话工作的决策地图：decision tickets + fog of war |
 | [to-spec](skills/workflow/to-spec/SKILL.md) | 把对话综合成 spec，保存为本地 Markdown 文件 |
-| [to-tickets](skills/workflow/to-tickets/SKILL.md) | 把 spec/计划拆成 tracer-bullet 工单，验收标准为手动验证步骤 |
+| [to-tickets](skills/workflow/to-tickets/SKILL.md) | 把 spec/计划拆成 tracer-bullet 工单，按项目配置区分后台数据流测试与手动验收标准 |
 | [triage](skills/workflow/triage/SKILL.md) | 把外来 bug/请求在分诊角色状态机里移动，产出 agent-ready 工单 |
-| [implement](skills/workflow/implement/SKILL.md) | 完成整张 ticket，构建通过后一次性交付 Markdown 验收清单 |
+| [implement](skills/workflow/implement/SKILL.md) | 完成整张 ticket，构建及所需数据流测试通过后交付 Markdown 验收清单 |
 | [implement-spec](skills/workflow/implement-spec/SKILL.md) | 仅显式调用：按工单依赖并行实现，逐批集成编译，按 ticket 交付验收清单 |
 | [check-result](skills/workflow/check-result/SKILL.md) | 读取用户填写的验收清单，推进修复或确认验收通过，再调用 code-review 完成审查 |
 | [code-review](skills/workflow/code-review/SKILL.md) | 变更审查：实现质量；有真实 spec 时核对需求，复杂变更按轴并行 |
@@ -66,7 +70,7 @@
 
 主流程：关键选择未定时先用 `grill-with-docs`；明确的小改动直接实现并报告检查结果。需要跨会话工单管理时走 `to-spec` → `to-tickets` → 逐工单 `implement` → 用户填写清单 → `check-result`。
 
-与常见流程的关键差异：**默认不新增自动化测试，用户明确要求时除外**。工单流程由用户按验证步骤手动运行程序确认；每张 ticket 完整实现并通过项目实际构建入口后一次交付验收清单。用户在清单勾选通过项并记录问题，`check-result` 读取结果并在验收通过后调用代码审查。独立审查找不到真实 spec 时报告需求核对边界；工单流程仍需真实 spec。`tdd` 与 `teach` 未移植（前者由本地验证约定适配，后者非开发流程）。词汇表与 ADR 统一放在 `.adev/`；多上下文使用 `.adev/GLOSSARY-MAP.md`。
+与常见流程的关键差异：**初始化时由用户明确选择是否需要自动化测试，并保存到验证配置**。启用时自动化仅验证后台数据流的输入输出；客户端操作流程始终由用户手动验收。不启用时提供手动输入输出核对步骤。每张 ticket 完整实现并通过项目实际构建及所需数据流测试后一次交付验收清单，分别记录自动化证据和手动验收项。用户在清单勾选手动项并记录问题，`check-result` 读取结果并在验收通过后调用代码审查。独立审查找不到真实 spec 时报告需求核对边界；工单流程仍需真实 spec。`tdd` 与 `teach` 未移植（前者由本地验证约定适配，后者非开发流程）。词汇表与 ADR 统一放在 `.adev/`；多上下文使用 `.adev/GLOSSARY-MAP.md`。
 
 ### 已归档（`skills/archive/`）
 

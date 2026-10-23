@@ -4,7 +4,7 @@
 
 ### 工单跟踪
 
-本地 Markdown 工单位于 `.adev/<feature>/issues/`；读写前见 `.adev/agents/issue-tracker.md`。
+本地 Markdown 工单位于 `.adev/<类型>/<yyyy-mm>/<描述>/issues/`；读写及更新 ADR 工作状态前见 `.adev/agents/issue-tracker.md`。
 
 ### 验证约定
 
