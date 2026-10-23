@@ -38,7 +38,7 @@ disable-model-invocation: true
 
 1. 检查并创建根部 `.adev/`。先迁移已确认的旧工作流内容：`docs/agents` → `.adev/agents`，`docs/adr` → `.adev/adr`，`docs/analysis` → `.adev/analysis`，`.scratch/<feature>` → `.adev/<类型>/<yyyy-mm>/<描述>`，`.out-of-scope` → `.adev/out-of-scope`。词汇改名并迁入上述布局，同步相对链接及指针。不整体搬走 `docs/`；仅当目标原本已有不同内容时报告冲突并等待裁决，不先生成目标再人为制造冲突。旧 `AGENTS.local.md` 只合并工作流指针，保留其余个人规则。
 2. 在迁入配置上原地更新或补建 `.adev/agents/issue-tracker.md`、`verification.md`、`domain.md`；有 triage 时另生成 `triage-labels.md`。保留既有有效约定，按已确认选择更新。参考 [references/configuration.md](references/configuration.md) 的操作语义，按目标仓库事实填写，不留下占位符。验证配置同时写入测试存放位置：明确放入单元测试项目的除外，其余放入同一工作目录的共享 `test/` 项目，按参考中的路径映射落盘，并写入累计回归与共享写入约定。按项目 ADR 编号创建或更新工作分类 ADR，在工单配置中写入其路径。
-3. 根部 `AGENTS.md` 创建或原地更新 `## Agent skills`：分别用一句话说明工单、验证、领域文档和可用时的分诊标签，并指向对应 `.adev/agents/*.md`。保留其他内容。消费者直接读取配置；被忽略目录需要显式访问，不能依赖默认搜索发现。
+3. 根部 `AGENTS.md` 创建或原地更新 `## Agent skills`：分别用一句话说明工单、验证、领域文档和可用时的分诊标签，并指向对应 `.adev/agents/*.md`。验证指针同时覆盖“生成任务辅助脚本或日志前”，verification.md 写入参考中的 temp/scripts 存放与清理约定，使无 ticket 的任务也能发现规则。保留其他内容。消费者直接读取配置；被忽略目录需要显式访问，不能依赖默认搜索发现。
 4. 根部 `.gitignore` 不存在则创建；缺少有效的整目录规则时补 `/.adev/`，等效规则已生效则不重复。处理会抵消它的反向规则，保留其他内容。此项是初始化固定操作。
 5. 在 Git 仓库用 `git check-ignore -v --no-index .adev/agents/issue-tracker.md` 验证忽略规则。已跟踪文件不会因忽略规则取消跟踪，报告剩余文件，不自动执行 `git rm --cached`。
 

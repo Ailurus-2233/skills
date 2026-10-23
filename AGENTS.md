@@ -8,7 +8,7 @@
 
 ### 验证约定
 
-修改 skill 或 PowerShell 模板时，读取 `.adev/agents/verification.md`，走读并演练，报告证据和验证边界。
+修改 skill 或 PowerShell 模板、生成任务辅助脚本或日志前，读取 `.adev/agents/verification.md`；按产物存放约定执行，修改后走读并演练，报告证据和验证边界。
 
 ### 领域文档
 
